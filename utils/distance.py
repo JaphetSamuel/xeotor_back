@@ -20,7 +20,7 @@ class Coord():
     @classmethod
     def add(cls, longitude:float, latitude:float, member:str):
 
-        values = [longitude[0], latitude, member]
+        values = [longitude, latitude, member]
 
         print(values)
         res = r.geoadd(name="coord",values=values, xx=True, ch=True)

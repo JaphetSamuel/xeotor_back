@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, HTTPException, Depends, Header
+from fastapi import FastAPI, Query, HTTPException, Depends, Header, Body, Form, Request
 from client.models.models import Client, Commande,  Payment, Trajet
 from client.models.utils import get_trajet_info
 from pydbantic import Database
@@ -40,11 +40,19 @@ async def get_client_by_id(client:Client = Depends(check_client)):
 
 
 
-
+async def print_request(request:Request):
+    print(request.base_url)
+    print(await request.body())
 
 #point de depart
-@app.post("/request_trajet")
-async def request_trajet(dep_lng:float, dep_lat:float, des_lng:float, des_lat:float):
+@app.post("/requesttrajet", dependencies=[Depends(print_request)])
+async def request_trajet(dep_lng:float = Body(...),
+                         dep_lat:float = Body(...),
+                         des_lng:float=Body(...),
+                         des_lat:float=Body(...),
+                         dep_name:str = Body(...),
+                         des_name:str = Body(...)
+                         ):
 
     polygone,distance,duration, dep,des  =  get_trajet_info(dep_lng,dep_lat,des_lng,des_lat)
     data =  {"polygone":polygone,
@@ -59,6 +67,10 @@ async def request_trajet(dep_lng:float, dep_lat:float, des_lng:float, des_lat:fl
             polygone=polygone,
             total_distance=distance,
             total_duration=duration,
+            depart = dep,
+            destination = des,
+            dep_name = dep_name,
+            des_name = des_name
         )
         await trajet.insert()
         prix_share, prix_prive, prix_luxe = trajet.calcule_prix()
@@ -76,12 +88,17 @@ async def request_trajet(dep_lng:float, dep_lat:float, des_lng:float, des_lat:fl
     return data
 
 @app.post('/commande', tags=["commande"])
-async def create_commande(trajet_id:str,flavour:str=Query(None), client:Client = Depends(check_client)):
+async def create_commande(trajet_id:str = Body(...),flavour:str=Body("share"), client:Client = Depends(check_client)):
     trajet = await Trajet.get(id=trajet_id)
     commande = Commande(trajet=trajet)
     commande.client = client
+    commande.flavour = flavour
     await commande.set_prix()
-    await commande.insert()
+    try :
+        await commande.insert()
+    except Exception as e:
+        print("exeption ici")
+        print(e.args)
 
     #creation d'un objet coord
     #et enregistrement de la commande dans la base de donne redis
@@ -98,4 +115,12 @@ async def create_trajet(trajet:Trajet):
 @app.get("/trajet", response_model=List[Trajet], tags=["trajets"])
 async def get_all_trajet():
     return await Trajet.all()
+
+@app.post("/cancelcommande")
+async def handle_cancel_commande(id:str = Body(...)):
+    commande = await Commande.exists().get(id=id)
+    commande.statut = "canceled"
+    dispatch("commande_canceled", payload=id)
+    await commande.update()
+    return True
 

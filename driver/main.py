@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, UploadFile, File
+from fastapi import FastAPI,HTTPException,Header,Body, Depends, UploadFile, File
 from fastapi.responses import HTMLResponse
 from typing import List
 from broadcaster import Broadcast
@@ -9,7 +9,7 @@ from fastapi_socketio import SocketManager
 from fastapi_events.handlers.local import local_handler
 from fastapi_events.typing import Event
 from utils.distance import Coord
-
+from client.models.models import Commande, Client
 
 app =FastAPI()
 
@@ -18,6 +18,12 @@ socket_manager = SocketManager(app)
 tables = [
     Driver
 ]
+
+async def check_driver(driver_id:str = Header(...)):
+    driver = await Driver.get(id=driver_id)
+    if driver is None:
+        raise HTTPException(401, detail="utilisazteur introuvable")
+    return driver
 
 html = """
 <!DOCTYPE html>
@@ -48,11 +54,15 @@ html = """
 async def view():
     return HTMLResponse(html)
 
+@app.get("/")
+async def driver_token(driver:Driver=Depends(check_driver)):
+    return driver
+
 @app.post("/create_driver", tags=["crud"], dependencies=[Depends(case_driver_exist)] )
-async def create_driver(driver:Driver, pc: UploadFile = File(...,)):
+async def create_driver(driver:Driver):
     await driver.insert()
 
-    return await Driver.filter(email=driver.email)
+    return await Driver.get(Driver.email==driver.email)
     #verifification des information
     #envoi de mail de confirmation
 

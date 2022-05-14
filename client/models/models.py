@@ -16,6 +16,9 @@ class Trajet(DataBaseModel):
     depart: list = []
     destination: list = []
 
+    dep_name: Optional[str] = None
+    des_name: Optional[str] = None
+
     def calcule_prix(self):
         prix: int = int(self.total_distance / 2)
         return prix+10, prix + 200, prix + 500
@@ -41,7 +44,7 @@ class Commande(DataBaseModel):
     id: Optional[str] = PrimaryKey(default=get_uuid)
 
     prix: Optional[int]
-    client:Optional[Client] = None
+    client:Client = None
     driver:Optional[str] = None #Pour l'instant
     payment: Optional[Payment] = None
 
