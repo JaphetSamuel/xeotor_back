@@ -22,6 +22,7 @@ app.add_middleware(EventHandlerASGIMiddleware,handlers=[local_handler])
 socket_manager = SocketManager(app)
 @app.on_event("startup")
 async def init_db():
+    # pass
     print("initialisaztion de la bd")
     try:
         db = await Database.create(
@@ -29,7 +30,6 @@ async def init_db():
             tables=client_tables + driver_tables,
             redis_url="redis://localhost"
         )
-        Client.init_set_metadata(MetaData(bind=db))
     except Exception as e:
         print("erreur d'initialisationde la bd")
         print(e)

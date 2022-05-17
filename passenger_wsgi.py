@@ -3,6 +3,8 @@ import sys
 from main import app
 from a2wsgi import ASGIMiddleware
 
+print("quelqque chose")
+
 application = ASGIMiddleware(app)
 
 
