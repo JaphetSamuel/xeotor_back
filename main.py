@@ -107,10 +107,10 @@ async def actual_position(sid, *args, **kwargs):
     else:
         print(f"commande non envoyé commande _driver_id ={commande.driver.id}")
 
-    try:
-        Coord.add( longitude=lng, latitude=lat, member=sid)
-    except Exception as e:
-        print(e.args)
+    # try:
+    #     Coord.add( longitude=lng, latitude=lat, member=sid)
+    # except Exception as e:
+    #     print(e.args)
 
 # A mettre dans les hander du client
 @local_handler.register(event_name="commande_accepted")
