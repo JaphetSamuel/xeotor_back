@@ -146,7 +146,7 @@ async def update_driver_state(state:str=Body(...), id_commande:str=Body(...)):
     commande = await Commande.get(id=id_commande)
     client_id = commande.client.id
     if state == "arrived":
-        print('river arrivé')
+        print('arriver arrivé')
         await socket_manager.emit(f"status_driver_{client_id}", {"data":"arrived"})
     if state == "begin":
         print('driver demare')

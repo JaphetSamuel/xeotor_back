@@ -5,6 +5,7 @@ from a2wsgi import ASGIMiddleware
 from pydbantic import Database
 from client.main import tables as client_tables
 from driver.main import tables as driver_tables
+import asyncio
 
 
 async def init_db():
@@ -20,7 +21,8 @@ async def init_db():
         print(e)
         print(e.args)
 
-await init_db()
+loop = asyncio.get_event_loop()
+value = loop.run_until_complete(init_db())
 
 application = ASGIMiddleware(app)
 
