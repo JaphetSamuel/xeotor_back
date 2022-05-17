@@ -23,11 +23,15 @@ app.add_middleware(EventHandlerASGIMiddleware,handlers=[local_handler])
 socket_manager = SocketManager(app)
 @app.on_event("startup")
 async def init_db():
-    db = await Database.create(
-        "sqlite:///./xeotor.db",
-        tables=client_tables + driver_tables,
-        redis_url="redis://localhost"
-    )
+    try:
+        db = await Database.create(
+            "sqlite:///./xeotor.db",
+            tables=client_tables + driver_tables,
+            redis_url="redis://localhost"
+        )
+    except Exception as e:
+        print("erreur d'initialisationde la bd")
+        print(e.args)
 
 
 app.mount("/driver", driver_app)

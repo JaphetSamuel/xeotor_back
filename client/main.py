@@ -25,7 +25,11 @@ tables = [
 @app.post("/register")
 async def register_client(client: Client):
     print("nouveau client")
-    await client.insert()
+    try:
+        await client.insert()
+    except Exception as e:
+        print("erreur de d'enregstrement dans la bd")
+        print(e.args)
     return client
 
 
