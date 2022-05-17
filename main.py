@@ -12,6 +12,7 @@ from client.models.models import Commande, Trajet, Client
 from driver.models.models import Driver
 from utils.distance import calcule_distance, Coord
 from fastapi.staticfiles import StaticFiles
+from wsgiref.simple_server import WSGIServer
 
 
 from pydbantic import Database
@@ -20,7 +21,6 @@ app = FastAPI()
 app.add_middleware(EventHandlerASGIMiddleware,handlers=[local_handler])
 # app.add_middleware(CORSMiddleware,allow_origins=[])
 socket_manager = SocketManager(app)
-
 @app.on_event("startup")
 async def init_db():
     db = await Database.create(
