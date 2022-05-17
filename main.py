@@ -12,8 +12,7 @@ from client.models.models import Commande, Trajet, Client
 from driver.models.models import Driver
 from utils.distance import calcule_distance, Coord
 from fastapi.staticfiles import StaticFiles
-from wsgiref.simple_server import WSGIServer
-
+from sqlalchemy import MetaData
 
 from pydbantic import Database
 from  fastapi_socketio import SocketManager
@@ -23,14 +22,17 @@ app.add_middleware(EventHandlerASGIMiddleware,handlers=[local_handler])
 socket_manager = SocketManager(app)
 @app.on_event("startup")
 async def init_db():
+    print("initialisaztion de la bd")
     try:
         db = await Database.create(
             "sqlite:///./xeotor.db",
             tables=client_tables + driver_tables,
             redis_url="redis://localhost"
         )
+        Client.init_set_metadata(MetaData(bind=db))
     except Exception as e:
         print("erreur d'initialisationde la bd")
+        print(e)
         print(e.args)
 
 
