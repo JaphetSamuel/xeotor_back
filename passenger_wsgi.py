@@ -8,7 +8,7 @@ from driver.main import tables as driver_tables
 import asyncio
 
 
-async def init_db():
+async def init_bd():
     print("initialisaztion de la bd dans init")
     try:
         db = await Database.create(
@@ -21,7 +21,8 @@ async def init_db():
         print(e)
         print(e.args)
 
-asyncio.run(init_db())
+asyncio.run(init_bd())
+
 
 application = ASGIMiddleware(app)
 
