@@ -16,11 +16,8 @@ from sqlalchemy import MetaData
 
 from pydbantic import Database
 from  fastapi_socketio import SocketManager
-app = FastAPI()
-app.add_middleware(EventHandlerASGIMiddleware,handlers=[local_handler])
-# app.add_middleware(CORSMiddleware,allow_origins=[])
-socket_manager = SocketManager(app)
-@app.on_event("startup")
+
+
 async def init_db():
     # pass
     print("initialisaztion de la bd")
@@ -34,6 +31,14 @@ async def init_db():
         print("erreur d'initialisationde la bd")
         print(e)
         print(e.args)
+
+app = FastAPI(
+    on_startup=[init_db]
+)
+app.add_middleware(EventHandlerASGIMiddleware,handlers=[local_handler])
+# app.add_middleware(CORSMiddleware,allow_origins=[])
+socket_manager = SocketManager(app)
+
 
 
 app.mount("/driver", driver_app)
