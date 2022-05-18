@@ -134,6 +134,7 @@ async def socket_accept_commande(sid, *args, **kwargs):
     print(data)
     commande:Commande = await Commande.get(id=data['id_commande'])
     commande.driver = data['id_driver']
+    commande.statut = "accepted"
     await commande.update()
     print(commande)
     print(data['id_driver'])
@@ -178,6 +179,9 @@ async def handle_abord_commande(commande_id:str):
     #dispatch("")
     commande = await Commande.get(id=commande_id)
     if commande:
+        if commande.statut != "accepted":
+            print("annulation d'une commande non acceptee")
+            await socket_manager.emit(f"commande_abort_{commande.id}")
         commande.statut = "aborted"
         await commande.update()
 

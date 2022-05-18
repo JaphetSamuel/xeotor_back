@@ -21,8 +21,7 @@ async def init_db():
         print(e)
         print(e.args)
 
-loop = asyncio.get_event_loop()
-value = loop.run_until_complete(init_db())
+asyncio.run(init_db())
 
 application = ASGIMiddleware(app)
 
