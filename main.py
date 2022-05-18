@@ -99,13 +99,19 @@ async def actual_position(sid, *args, **kwargs):
     id=data['id']
     commande_id = data['id_commande']
     commande:Commande = await Commande.get(id=commande_id)
-    if commande and commande.statut != "aborted" and commande.driver==id:
+    if commande and\
+            commande.statut != "aborted" and\
+            commande.driver==id and\
+            commande.statut != "arrived" and\
+            commande.statut != "end":
         print("envoi de la position au client")
         await socket_manager.emit(f"position_driver_{commande.client.id}",
                                   {"lng":lng, "lat":lat}
                                   )
     else:
-        print(f"commande non envoyé commande _driver_id ={commande.driver.id}")
+        print(commande.driver)
+        print(commande.statut)
+        print(f"commande non envoyé commande _driver_id ={commande.driver}")
 
     # try:
     #     Coord.add( longitude=lng, latitude=lat, member=sid)
@@ -146,12 +152,16 @@ async def update_driver_state(state:str=Body(...), id_commande:str=Body(...)):
     commande = await Commande.get(id=id_commande)
     client_id = commande.client.id
     if state == "arrived":
+        commande.statut = "arrived"
+        commande.update
         print('arriver arrivé')
         await socket_manager.emit(f"status_driver_{client_id}", {"data":"arrived"})
     if state == "begin":
         print('driver demare')
         await socket_manager.emit(f"status_driver_{client_id}", {"data": "begin"})
     if state == "end":
+        commande.statut = "end"
+        commande.update
         print('driver end')
         await socket_manager.emit(f"status_driver_{client_id}", {"data":"end"})
 
@@ -173,7 +183,9 @@ async def handle_abord_commande(commande_id:str):
 
     if commande.driver:
         print(commande.driver)
-        print(f"commande_abort_{commande.driver}")
+        print("id de la ommande", commande.id)
+        print("statut de la commande", commande.statut)
+        print(f" annulation commande_abort_{commande.driver}")
         await socket_manager.emit(f"commande_abort_{commande.driver}")
     else:
         print("aucun driver sur la commande")
